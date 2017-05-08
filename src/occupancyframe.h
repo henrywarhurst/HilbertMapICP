@@ -20,16 +20,17 @@ class OccupancyFrame
 		size_t width_;
 		size_t height_;
 
-		std::vector<double> x;
-		std::vector<double> y;
-		std::vector<double> z;
+		std::vector<double> x_;
+		std::vector<double> y_;
+		std::vector<double> z_;
 		
-		std::vector<int> occupancy;
+		std::vector<int> occupancy_;
 
-		static constexpr const double kFocalCentreX 	= 525.0;
-		static constexpr const double kFocalCentreY 	= 525.0;
-		static constexpr const double kOpticalCentreX 	= 319.5;
-		static constexpr const double kOpticalCentreY 	= 239.5;
+		static constexpr const double kCorrectionFactor = 5000.0 	;
+		static constexpr const double kFocalCentreX 	= 525.0		;
+		static constexpr const double kFocalCentreY 	= 525.0		;
+		static constexpr const double kOpticalCentreX 	= 319.5		;
+		static constexpr const double kOpticalCentreY 	= 239.5		;
 };
 
 #endif /* OCCUPANCY_FRAME_H_ */
