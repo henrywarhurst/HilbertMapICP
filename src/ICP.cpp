@@ -1,4 +1,5 @@
 #include "ICPOdometry.h"
+#include "occupancyframe.h"
 
 #include <iomanip>
 #include <fstream>
@@ -239,6 +240,11 @@ int main(int argc, char * argv[])
         std::swap(firstRaw, secondRaw);
 
         outputFreiburg("output.poses", timestamp, T_wc_curr.cast<float>().matrix());
+
+		// OccupancyFrames ---------------------------------------------------------
+		OccupancyFrame curOccupancyFrame((unsigned char *) firstRaw.ptr);
+		bool isOccupancyComputationOk = curOccupancyFrame.compute();
+		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count));
 
         timestamp = loadDepth(secondRaw);
     }
