@@ -27,8 +27,8 @@ class OccupancyFrame
 		std::vector<int> occupancy_;
 
 		static constexpr const double kCorrectionFactor = 5000.0 	;
-		static constexpr const double kFocalCentreX 	= 525.0		;
-		static constexpr const double kFocalCentreY 	= 525.0		;
+		static constexpr const double kFocalLengthX 	= 525.0		;
+		static constexpr const double kFocalLengthY 	= 525.0		;
 		static constexpr const double kOpticalCentreX 	= 319.5		;
 		static constexpr const double kOpticalCentreY 	= 239.5		;
 };
