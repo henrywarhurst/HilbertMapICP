@@ -26,6 +26,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${EIGEN_INCLUDE_DIRS})
 include_directories(${Sophus_INCLUDE_DIR})
 
+
 file(GLOB srcs *.cpp)
 file(GLOB cuda Cuda/*.cu)
 file(GLOB containers Cuda/containers/*.cpp)
@@ -42,6 +43,12 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "--ftz=true;--prec-div=false;--prec-sqrt=
 
 CUDA_COMPILE(cuda_objs ${cuda})
 
+find_package(PCL 1.3 REQUIRED COMPONENTS common io)
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 set(CMAKE_CXX_FLAGS "-O3 -msse2 -msse3 -Wall -std=c++11")
 
 add_executable(ICP 
@@ -55,5 +62,7 @@ target_link_libraries(ICP
                       ${Pangolin_LIBRARIES}
                       ${Eigen_LIBRARIES}
                       ${CUDA_LIBRARIES}
+					  ${PCL_COMMON_LIBRARIES}
+					  ${PCL_IO_LIBRARIES}
 )
 
