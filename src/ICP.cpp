@@ -239,14 +239,16 @@ int main(int argc, char * argv[])
 
         std::swap(firstRaw, secondRaw);
 
-        outputFreiburg("output.poses", timestamp, T_wc_curr.cast<float>().matrix());
-
+		Eigen::Matrix4f worldPose = T_wc_curr.cast<float>().matrix();
+		std::cout << worldPose << std::endl;
+        outputFreiburg("output.poses", timestamp, worldPose);
 
         timestamp = loadDepth(secondRaw);
+
  		// OccupancyFrames ---------------------------------------------------------
 		OccupancyFrame curOccupancyFrame(secondRaw);
-		bool isOccupancyComputationOk = curOccupancyFrame.compute();
-		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", true);
+		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose);
+		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, false);
 		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count));
    }
 

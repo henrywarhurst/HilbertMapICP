@@ -9,12 +9,12 @@ OccupancyFrame::OccupancyFrame(const pangolin::Image<unsigned short> &depth)
 	: depth_(depth)
 	{}
 
-bool OccupancyFrame::compute()
+bool OccupancyFrame::compute(Eigen::Matrix4f worldPose)
 {
 	for (size_t v=0; v<depth_.h; ++v) {
 		for (size_t u=0; u<depth_.w; ++u) {
-
 			unsigned short curDepth = depth_.RowPtr(v)[u];
+
 			// Leave out the dead pixels
 			if (curDepth == 0) continue;
 
@@ -45,7 +45,7 @@ bool OccupancyFrame::compute()
 
 // If generateOccupancyCloud is set to true, points behind objects will be added to the cloud
 // to create a dense model
-void OccupancyFrame::writePointCloud(std::string pointCloudFileName, bool generateOccupancyCloud)
+void OccupancyFrame::writePointCloud(std::string pointCloudFileName, Eigen::Matrix4f worldPose, bool generateOccupancyCloud)
 {
 	pcl::PointCloud<pcl::PointXYZ> cloud;
 	if (!generateOccupancyCloud) {
@@ -65,7 +65,7 @@ void OccupancyFrame::writePointCloud(std::string pointCloudFileName, bool genera
 			size_t depthIdx = v*depth_.h + u;
 
 			// Downsample
-			if (depthIdx % 20 != 0) continue;
+			if (depthIdx % 2 != 0) continue;
 
 			unsigned short curDepth = depth_.RowPtr(v)[u];
 
@@ -76,16 +76,22 @@ void OccupancyFrame::writePointCloud(std::string pointCloudFileName, bool genera
 				double cloudZ = (double) curDepth / kCorrectionFactor;
 				double cloudX = ((u - kOpticalCentreX)*cloudZ) / kFocalLengthX;
 				double cloudY = ((v - kOpticalCentreY)*cloudZ) / kFocalLengthY;
-				// Send to pcl and save as pcd file to view
-				cloud.points[depthIdx].x = cloudX;
-				cloud.points[depthIdx].y = cloudY;
-				cloud.points[depthIdx].z = cloudZ;
+
+				// Transform points to accurate world locations
+				Eigen::RowVector4f curPoint;
+				curPoint << cloudX, cloudY, cloudZ, 1;
+				Eigen::MatrixXf transformedPoint = worldPose * curPoint.transpose();
+
+				// Dehomogenise and add to point cloud
+				cloud.points[depthIdx].x = transformedPoint(0,0) / transformedPoint(3,0);
+				cloud.points[depthIdx].y = transformedPoint(1,0) / transformedPoint(3,0);
+				cloud.points[depthIdx].z = transformedPoint(2,0) / transformedPoint(3,0);
 			} else {
 				for (size_t rayZ=curDepth; rayZ<kMaxZ; rayZ+=kStepZ) {
 					double curZ = (double) rayZ / kCorrectionFactor;
 					double curX = (u - kOpticalCentreX)*curZ / kFocalLengthX;
 					double curY = (v - kOpticalCentreY)*curZ / kFocalLengthY;
-					
+				
 					modelX.push_back(curX);
 					modelY.push_back(curY);
 					modelZ.push_back(curZ);	

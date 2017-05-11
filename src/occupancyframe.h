@@ -6,15 +6,17 @@
 
 #include <pangolin/image/image_io.h>
 
+#include <eigen3/Eigen/Dense>
+
 class OccupancyFrame
 {
 	public:
 
 		OccupancyFrame(const pangolin::Image<unsigned short> &depth);
 
-		bool compute();
+		bool compute(Eigen::Matrix4f worldPose);
 
-		void writePointCloud(std::string pointCloudFileName, bool generateOccupancyCloud);
+		void writePointCloud(std::string pointCloudFileName, Eigen::Matrix4f worldPose, bool generateOccupancyCloud);
 
 		bool writeToFile(std::string filename);	
 
