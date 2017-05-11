@@ -247,10 +247,11 @@ int main(int argc, char * argv[])
         timestamp = loadDepth(secondRaw);
 
  		// OccupancyFrames ---------------------------------------------------------
+		size_t downsampleFactor = 2;
 		OccupancyFrame curOccupancyFrame(secondRaw);
-		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose);
-		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, false);
-		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count));
+		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose, downsampleFactor);
+		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, downsampleFactor, false);
+		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count) + ".occ", ",");
    	}
 
     std::cout << std::endl;

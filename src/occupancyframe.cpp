@@ -1,6 +1,7 @@
 #include "occupancyframe.h"
 
 #include <iostream>
+#include <fstream>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -9,14 +10,19 @@ OccupancyFrame::OccupancyFrame(const pangolin::Image<unsigned short> &depth)
 	: depth_(depth)
 	{}
 
-bool OccupancyFrame::compute(Eigen::Matrix4f worldPose)
+// 1/downsampleFactor is the percentage of pixels used
+bool OccupancyFrame::compute(Eigen::Matrix4f worldPose, size_t downsampleFactor)
 {
 	for (size_t v=0; v<depth_.h; ++v) {
 		for (size_t u=0; u<depth_.w; ++u) {
 			unsigned short curDepth = depth_.RowPtr(v)[u];
+			size_t depthIdx = v*depth_.h + u;
 
 			// Leave out the dead pixels
 			if (curDepth == 0) continue;
+
+			// Downsample
+			if (depthIdx % downsampleFactor != 0) continue;
 
 			for (size_t rayZ=kStartZ; rayZ<kMaxZ; rayZ+=kStepZ) {
 				double curZ = (double) rayZ / kCorrectionFactor;	
@@ -44,13 +50,15 @@ bool OccupancyFrame::compute(Eigen::Matrix4f worldPose)
 			}	
 		}
 	}
-	
 	return true;
 }
 
 // If generateOccupancyCloud is set to true, points behind objects will be added to the cloud
 // to create a dense model
-void OccupancyFrame::writePointCloud(std::string pointCloudFileName, Eigen::Matrix4f worldPose, bool generateOccupancyCloud)
+void OccupancyFrame::writePointCloud(	std::string pointCloudFileName, 
+										Eigen::Matrix4f worldPose,
+										size_t downsampleFactor,
+										bool generateOccupancyCloud)
 {
 	pcl::PointCloud<pcl::PointXYZ> cloud;
 	if (!generateOccupancyCloud) {
@@ -70,7 +78,7 @@ void OccupancyFrame::writePointCloud(std::string pointCloudFileName, Eigen::Matr
 			size_t depthIdx = v*depth_.h + u;
 
 			// Downsample
-			if (depthIdx % 2 != 0) continue;
+			if (depthIdx % downsampleFactor != 0) continue;
 
 			unsigned short curDepth = depth_.RowPtr(v)[u];
 
@@ -122,12 +130,12 @@ void OccupancyFrame::writePointCloud(std::string pointCloudFileName, Eigen::Matr
 	pcl::io::savePCDFileASCII (pointCloudFileName, cloud);
 }
 
-bool OccupancyFrame::writeToFile(std::string filename, std::string delimiter)
+bool OccupancyFrame::writeToFile(std::string filename, std::string delim)
 {
-	ofstream occupancyFile (filename);
+	std::ofstream occupancyFile (filename);
 	if (!occupancyFile.is_open()) {
 		std::cout << "There was a problem writing the file " << filename << std::endl;
-		return false
+		return false;
 	}	
 
 	if (x_.size() != y_.size() || y_.size() != z_.size() || z_.size() != occupancy_.size()) {
@@ -139,7 +147,7 @@ bool OccupancyFrame::writeToFile(std::string filename, std::string delimiter)
 		occupancyFile << x_[i] 			<< delim;
 		occupancyFile << y_[i] 			<< delim;
 		occupancyFile << z_[i] 			<< delim;
-		occupancyFile << occupancy[i] 	<< std::endl;	
+		occupancyFile << occupancy_[i] 	<< std::endl;	
 	}
 	occupancyFile.close();
 

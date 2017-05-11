@@ -14,11 +14,14 @@ class OccupancyFrame
 
 		OccupancyFrame(const pangolin::Image<unsigned short> &depth);
 
-		bool compute(Eigen::Matrix4f worldPose);
+		bool compute(Eigen::Matrix4f worldPose, size_t downsampleFactor);
 
-		void writePointCloud(std::string pointCloudFileName, Eigen::Matrix4f worldPose, bool generateOccupancyCloud);
+		void writePointCloud(	std::string pointCloudFileName, 
+							 	Eigen::Matrix4f worldPose, 
+								size_t downsampleFactor, 
+								bool generateOccupancyCloud);
 
-		bool writeToFile(std::string filename, std::string delimiter);	
+		bool writeToFile(std::string filename, std::string delim);	
 
 	private:	
 		const pangolin::Image<unsigned short> depth_;
@@ -35,9 +38,9 @@ class OccupancyFrame
 		static constexpr const double kOpticalCentreX 	= 319.5		;
 		static constexpr const double kOpticalCentreY 	= 239.5		;
 
-		static constexpr const size_t kMaxZ				= 2000;
-		static constexpr const size_t kStepZ			= 100;
-		static constexpr const size_t kStartZ			= 100;
+		static constexpr const size_t kMaxZ				= 2000		;
+		static constexpr const size_t kStepZ			= 200		;
+		static constexpr const size_t kStartZ			= 100		;
 };
 
 #endif /* OCCUPANCY_FRAME_H_ */
