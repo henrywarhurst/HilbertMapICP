@@ -35,7 +35,7 @@ class OccupancyFrame
 
 		static constexpr const size_t kMaxZ				= 2000;
 		static constexpr const size_t kStepZ			= 100;
-		static constexpr const size_t kStartZ			= 1;
+		static constexpr const size_t kStartZ			= 100;
 };
 
 #endif /* OCCUPANCY_FRAME_H_ */
