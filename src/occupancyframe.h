@@ -18,7 +18,7 @@ class OccupancyFrame
 
 		void writePointCloud(std::string pointCloudFileName, Eigen::Matrix4f worldPose, bool generateOccupancyCloud);
 
-		bool writeToFile(std::string filename);	
+		bool writeToFile(std::string filename, std::string delimiter);	
 
 	private:	
 		const pangolin::Image<unsigned short> depth_;

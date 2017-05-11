@@ -28,9 +28,14 @@ bool OccupancyFrame::compute(Eigen::Matrix4f worldPose)
 					curOccupancy = 1;
 				}
 				
-				x_.push_back(curX);
-				y_.push_back(curY);
-				z_.push_back(curZ);
+				// Transform points to accurate world locations
+				Eigen::RowVector4f curPoint;
+				curPoint << curX, curY, curZ, 1;
+				Eigen::Vector4f transformedPoint = worldPose * curPoint.transpose();
+
+				x_.push_back(transformedPoint(0));
+				y_.push_back(transformedPoint(1));
+				z_.push_back(transformedPoint(2));
 				occupancy_.push_back(curOccupancy);
   		
 //				std::cout << "rayZ = " << rayZ << std::endl;	
@@ -87,9 +92,6 @@ void OccupancyFrame::writePointCloud(std::string pointCloudFileName, Eigen::Matr
 				cloud.points[depthIdx].y = transformedPoint(1);
 				cloud.points[depthIdx].z = transformedPoint(2);
 			
-//				cloud.points[depthIdx].x = cloudX;
-//				cloud.points[depthIdx].y = cloudY;
-//				cloud.points[depthIdx].z = cloudZ;
 			} else {
 				for (size_t rayZ=curDepth; rayZ<kMaxZ; rayZ+=kStepZ) {
 					double curZ = (double) rayZ / kCorrectionFactor;
@@ -120,7 +122,26 @@ void OccupancyFrame::writePointCloud(std::string pointCloudFileName, Eigen::Matr
 	pcl::io::savePCDFileASCII (pointCloudFileName, cloud);
 }
 
-bool OccupancyFrame::writeToFile(std::string filename)
+bool OccupancyFrame::writeToFile(std::string filename, std::string delimiter)
 {
+	ofstream occupancyFile (filename);
+	if (!occupancyFile.is_open()) {
+		std::cout << "There was a problem writing the file " << filename << std::endl;
+		return false
+	}	
+
+	if (x_.size() != y_.size() || y_.size() != z_.size() || z_.size() != occupancy_.size()) {
+		std::cout << "File could not be written. Coordinate vectors are inconsistent sizes!" << std::endl;
+		return false;
+	}
+
+	for (size_t i=0; i<x_.size(); ++i) {
+		occupancyFile << x_[i] 			<< delim;
+		occupancyFile << y_[i] 			<< delim;
+		occupancyFile << z_[i] 			<< delim;
+		occupancyFile << occupancy[i] 	<< std::endl;	
+	}
+	occupancyFile.close();
+
 	return true;	
 }

@@ -251,7 +251,7 @@ int main(int argc, char * argv[])
 		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose);
 		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, false);
 		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count));
-   }
+   	}
 
     std::cout << std::endl;
 
