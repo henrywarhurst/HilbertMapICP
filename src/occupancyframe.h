@@ -4,18 +4,20 @@
 #include <string>
 #include <vector>
 
+#include <pangolin/image/image_io.h>
+
 class OccupancyFrame
 {
 	public:
 
-		OccupancyFrame(const unsigned char *depth, size_t width=640, size_t height=480);
+		OccupancyFrame(pangolin::Image<unsigned short> &depth, size_t width=640, size_t height=480);
 
 		bool compute();
 
 		bool writeToFile(std::string filename);	
 
 	private:	
-		const unsigned char *depth_;
+		pangolin::Image<unsigned short> depth_;
 
 		size_t width_;
 		size_t height_;
