@@ -14,7 +14,7 @@ class OccupancyFrame
 
 		bool compute();
 
-		void writePointCloud(std::string pointCloudFileName);
+		void writePointCloud(std::string pointCloudFileName, bool generateOccupancyCloud);
 
 		bool writeToFile(std::string filename);	
 
@@ -32,6 +32,10 @@ class OccupancyFrame
 		static constexpr const double kFocalLengthY 	= 525.0		;
 		static constexpr const double kOpticalCentreX 	= 319.5		;
 		static constexpr const double kOpticalCentreY 	= 239.5		;
+
+		static constexpr const size_t kMaxZ				= 2000;
+		static constexpr const size_t kStepZ			= 100;
+		static constexpr const size_t kStartZ			= 1;
 };
 
 #endif /* OCCUPANCY_FRAME_H_ */
