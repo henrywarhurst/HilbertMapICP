@@ -83,9 +83,13 @@ void OccupancyFrame::writePointCloud(std::string pointCloudFileName, Eigen::Matr
 				Eigen::MatrixXf transformedPoint = worldPose * curPoint.transpose();
 
 				// Dehomogenise and add to point cloud
-				cloud.points[depthIdx].x = transformedPoint(0,0) / transformedPoint(3,0);
-				cloud.points[depthIdx].y = transformedPoint(1,0) / transformedPoint(3,0);
-				cloud.points[depthIdx].z = transformedPoint(2,0) / transformedPoint(3,0);
+				//cloud.points[depthIdx].x = transformedPoint(0,0);
+				//cloud.points[depthIdx].y = transformedPoint(1,0);
+				//cloud.points[depthIdx].z = transformedPoint(2,0);
+			
+				cloud.points[depthIdx].x = cloudX;
+				cloud.points[depthIdx].y = cloudY;
+				cloud.points[depthIdx].z = cloudZ;
 			} else {
 				for (size_t rayZ=curDepth; rayZ<kMaxZ; rayZ+=kStepZ) {
 					double curZ = (double) rayZ / kCorrectionFactor;

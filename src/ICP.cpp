@@ -240,7 +240,8 @@ int main(int argc, char * argv[])
         std::swap(firstRaw, secondRaw);
 
 		Eigen::Matrix4f worldPose = T_wc_curr.cast<float>().matrix();
-		std::cout << worldPose << std::endl;
+		std::cout << std::endl;
+		//std::cout << worldPose << std::endl;
         outputFreiburg("output.poses", timestamp, worldPose);
 
         timestamp = loadDepth(secondRaw);
