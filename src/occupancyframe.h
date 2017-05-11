@@ -10,17 +10,16 @@ class OccupancyFrame
 {
 	public:
 
-		OccupancyFrame(pangolin::Image<unsigned short> &depth, size_t width=640, size_t height=480);
+		OccupancyFrame(const pangolin::Image<unsigned short> &depth);
 
 		bool compute();
+
+		void writePointCloud(std::string pointCloudFileName);
 
 		bool writeToFile(std::string filename);	
 
 	private:	
-		pangolin::Image<unsigned short> depth_;
-
-		size_t width_;
-		size_t height_;
+		const pangolin::Image<unsigned short> depth_;
 
 		std::vector<double> x_;
 		std::vector<double> y_;

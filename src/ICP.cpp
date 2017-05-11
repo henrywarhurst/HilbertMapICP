@@ -246,6 +246,7 @@ int main(int argc, char * argv[])
  		// OccupancyFrames ---------------------------------------------------------
 		OccupancyFrame curOccupancyFrame(secondRaw);
 		bool isOccupancyComputationOk = curOccupancyFrame.compute();
+		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd");
 		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count));
    }
 
