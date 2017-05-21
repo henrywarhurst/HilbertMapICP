@@ -7,6 +7,7 @@
 #include <pangolin/image/image_io.h>
 
 std::ifstream asFile;
+std::ifstream colourFile;
 std::string directory;
 
 void tokenize(const std::string & str, std::vector<std::string> & tokens, std::string delimiters = " ")
@@ -23,6 +24,37 @@ void tokenize(const std::string & str, std::vector<std::string> & tokens, std::s
         pos = str.find_first_of(delimiters, lastPos);
     }
 }
+
+void loadImage(pangolin::Image<unsigned short> & image)
+{   
+    std::string currentLine;  
+    std::vector<std::string> tokens;
+    std::vector<std::string> timeTokens;
+
+    do
+    {   
+        getline(colourFile, currentLine);
+        tokenize(currentLine, tokens);
+    } while(tokens.size() > 2);
+
+    if(tokens.size() == 0)
+        return;
+
+    std::string imageLoc = directory;
+    imageLoc.append(tokens[1]);
+
+	std::cout << "imageLoc = " << imageLoc << std::endl;
+
+    pangolin::TypedImage imageRaw = pangolin::LoadImage(imageLoc, pangolin::ImageFileTypePng);
+
+	std::cout << "first pixel " << (unsigned short) imageRaw(0,0) << std::endl;
+	std::cout << "second pixel " << (unsigned short) imageRaw(1,0) << std::endl;
+	std::cout << "third pixel " << (unsigned short) imageRaw(2,0) << std::endl;
+	std::cout << "last pixel " << (int) imageRaw(1280, 479);
+
+    imageRaw.Dealloc();
+}
+
 
 uint64_t loadDepth(pangolin::Image<unsigned short> & depth)
 {
@@ -109,11 +141,20 @@ int main(int argc, char * argv[])
 
     asFile.open(associationFile.c_str());
 
+	std::string imageAssociationFile = directory;
+	imageAssociationFile.append("rgb.txt");
+
+	colourFile.open(imageAssociationFile.c_str());	
+
     pangolin::ManagedImage<unsigned short> firstData(640, 480);
     pangolin::ManagedImage<unsigned short> secondData(640, 480);
 
+	pangolin::ManagedImage<unsigned short> colourData(640, 480);
+
     pangolin::Image<unsigned short> firstRaw(firstData.w, firstData.h, firstData.pitch, (unsigned short*)firstData.ptr);
     pangolin::Image<unsigned short> secondRaw(secondData.w, secondData.h, secondData.pitch, (unsigned short*)secondData.ptr);
+
+	pangolin::Image<unsigned short> colourRaw(colourData.w, colourData.h, colourData.pitch, (unsigned short*)colourData.ptr);
 
     ICPOdometry icpOdom(640, 480, 319.5, 239.5, 528, 528);
 
@@ -121,6 +162,9 @@ int main(int argc, char * argv[])
 
     loadDepth(firstRaw);
     uint64_t timestamp = loadDepth(secondRaw);
+
+	// Load in RGB data
+	loadImage(colourRaw);
 
     Sophus::SE3d T_wc_prev;
     Sophus::SE3d T_wc_curr;
@@ -241,13 +285,14 @@ int main(int argc, char * argv[])
 
 		Eigen::Matrix4f worldPose = T_wc_curr.cast<float>().matrix();
 		std::cout << std::endl;
-		//std::cout << worldPose << std::endl;
+		std::cout << "World pose is: " << std::endl;
+		std::cout << worldPose << std::endl;
         outputFreiburg("output.poses", timestamp, worldPose);
 
         timestamp = loadDepth(secondRaw);
 
  		// OccupancyFrames ---------------------------------------------------------
-		size_t downsampleFactor = 2;
+		size_t downsampleFactor = 16;
 		OccupancyFrame curOccupancyFrame(secondRaw);
 		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose, downsampleFactor);
 		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, downsampleFactor, false);
