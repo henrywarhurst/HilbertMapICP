@@ -47,10 +47,11 @@ void loadImage(pangolin::Image<unsigned short> & image)
 
     pangolin::TypedImage imageRaw = pangolin::LoadImage(imageLoc, pangolin::ImageFileTypePng);
 
-	std::cout << "first pixel " << (unsigned short) imageRaw(0,0) << std::endl;
-	std::cout << "second pixel " << (unsigned short) imageRaw(1,0) << std::endl;
-	std::cout << "third pixel " << (unsigned short) imageRaw(2,0) << std::endl;
-	std::cout << "last pixel " << (int) imageRaw(1280, 479);
+	std::cout << "first pixel " << (unsigned short) imageRaw.RowPtr(479)[0] << std::endl;
+	std::cout << "second pixel " << (unsigned short) imageRaw.RowPtr(479)[1] << std::endl;
+	std::cout << "third pixel " << (unsigned short) imageRaw.RowPtr(479)[2] << std::endl;
+
+	std::cout << "Width = " << imageRaw.w << " Height = " << imageRaw.h << std::endl;
 
     imageRaw.Dealloc();
 }
