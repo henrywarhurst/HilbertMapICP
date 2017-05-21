@@ -25,7 +25,7 @@ void tokenize(const std::string & str, std::vector<std::string> & tokens, std::s
     }
 }
 
-pangolin::TypedImage loadImage()
+pangolin::Image<unsigned short> loadImage()
 {   
     std::string currentLine;  
     std::vector<std::string> tokens;
@@ -43,13 +43,20 @@ pangolin::TypedImage loadImage()
 	std::cout << "imageLoc = " << imageLoc << std::endl; 
     pangolin::TypedImage imageRaw = pangolin::LoadImage(imageLoc, pangolin::ImageFileTypePng);
 
-	std::cout << "first pixel " << (unsigned short) imageRaw.RowPtr(479)[0] << std::endl;
-	std::cout << "second pixel " << (unsigned short) imageRaw.RowPtr(479)[1] << std::endl;
-	std::cout << "third pixel " << (unsigned short) imageRaw.RowPtr(479)[2] << std::endl;
+	pangolin::Image<unsigned short> imageOutput((unsigned short *) imageRaw.ptr, 
+												imageRaw.w, 
+												imageRaw.h, 
+												3*imageRaw.w * sizeof(unsigned short));
+
+	std::cout << "first pixel " << (unsigned short) imageOutput.RowPtr(479)[0] << std::endl;
+	std::cout << "second pixel " << (unsigned short) imageOutput.RowPtr(479)[1] << std::endl;
+	std::cout << "third pixel " << (unsigned short) imageOutput.RowPtr(479)[2] << std::endl;
 
 	std::cout << "Width = " << imageRaw.w << " Height = " << imageRaw.h << std::endl;
 
-	return imageRaw;
+	imageRaw.Dealloc();
+
+	return imageOutput;
 }
 
 
@@ -282,11 +289,11 @@ int main(int argc, char * argv[])
         timestamp = loadDepth(secondRaw);
 
 		// Get RGB data
-		pangolin::TypedImage colourData = loadImage();
+		pangolin::Image<unsigned short> colourData = loadImage();
 
  		// OccupancyFrames ---------------------------------------------------------
 		size_t downsampleFactor = 16;
-		OccupancyFrame curOccupancyFrame(secondRaw);
+		OccupancyFrame curOccupancyFrame(secondRaw, colourData);
 		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose, downsampleFactor);
 		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, downsampleFactor, false);
 		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count) + ".occ", ",");

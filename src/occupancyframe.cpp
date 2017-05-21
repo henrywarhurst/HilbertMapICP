@@ -6,8 +6,10 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 
-OccupancyFrame::OccupancyFrame(const pangolin::Image<unsigned short> &depth)
-	: depth_(depth)
+OccupancyFrame::OccupancyFrame(const pangolin::Image<unsigned short> &depth, 
+							   const pangolin::Image<unsigned short> &rgb)
+	: depth_(depth),
+	  rgb_(rgb)
 	{}
 
 // 1/downsampleFactor is the percentage of pixels used

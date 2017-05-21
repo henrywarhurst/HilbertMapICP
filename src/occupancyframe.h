@@ -12,7 +12,8 @@ class OccupancyFrame
 {
 	public:
 
-		OccupancyFrame(const pangolin::Image<unsigned short> &depth);
+		OccupancyFrame(const pangolin::Image<unsigned short> &depth,
+					   const pangolin::Image<unsigned short> &rgb);
 
 		bool compute(Eigen::Matrix4f worldPose, size_t downsampleFactor);
 
@@ -25,6 +26,7 @@ class OccupancyFrame
 
 	private:	
 		const pangolin::Image<unsigned short> depth_;
+		const pangolin::Image<unsigned short> rgb_;
 
 		std::vector<double> x_;
 		std::vector<double> y_;
