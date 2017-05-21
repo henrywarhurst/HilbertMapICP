@@ -7,9 +7,9 @@
 #include <pcl/point_types.h>
 
 OccupancyFrame::OccupancyFrame(const pangolin::Image<unsigned short> &depth, 
-							   const pangolin::Image<unsigned short> &rgb)
+							   const pangolin::Image<unsigned char> &rgb)
 	: depth_(depth),
-	  rgb_(rgb)
+	  rgbMap_(rgb)
 	{}
 
 // 1/downsampleFactor is the percentage of pixels used
@@ -55,6 +55,7 @@ bool OccupancyFrame::compute(Eigen::Matrix4f worldPose, size_t downsampleFactor)
 	return true;
 }
 
+
 // If generateOccupancyCloud is set to true, points behind objects will be added to the cloud
 // to create a dense model
 void OccupancyFrame::writePointCloud(	std::string pointCloudFileName, 
@@ -62,7 +63,7 @@ void OccupancyFrame::writePointCloud(	std::string pointCloudFileName,
 										size_t downsampleFactor,
 										bool generateOccupancyCloud)
 {
-	pcl::PointCloud<pcl::PointXYZ> cloud;
+	pcl::PointCloud<pcl::PointXYZRGB> cloud;
 	if (!generateOccupancyCloud) {
 		size_t nPoints = depth_.w * depth_.h;
 		cloud.width = nPoints;
@@ -78,12 +79,16 @@ void OccupancyFrame::writePointCloud(	std::string pointCloudFileName,
 	for (size_t v=0; v<depth_.h; ++v) {
 		for (size_t u=0; u<depth_.w; ++u) {
 			size_t depthIdx = v*depth_.h + u;
-
+	
 			// Downsample
 			if (depthIdx % downsampleFactor != 0) continue;
 
 			unsigned short curDepth = depth_.RowPtr(v)[u];
-
+			
+			unsigned char redChannel = rgbMap_.RowPtr(v)[u*3];
+			unsigned char greenChannel = rgbMap_.RowPtr(v)[u*3 + 1];
+			unsigned char blueChannel = rgbMap_.RowPtr(v)[u*3 + 2];
+		
 			// Don't bother processing dead pixels
 			if (curDepth < 5) continue;
 
@@ -101,6 +106,11 @@ void OccupancyFrame::writePointCloud(	std::string pointCloudFileName,
 				cloud.points[depthIdx].x = transformedPoint(0);
 				cloud.points[depthIdx].y = transformedPoint(1);
 				cloud.points[depthIdx].z = transformedPoint(2);
+
+				// Add colour to the point cloud
+				cloud.points[depthIdx].r = redChannel;
+				cloud.points[depthIdx].g = greenChannel;
+				cloud.points[depthIdx].b = blueChannel;
 			
 			} else {
 				for (size_t rayZ=curDepth; rayZ<kMaxZ; rayZ+=kStepZ) {
