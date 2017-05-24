@@ -8,12 +8,14 @@
 
 #include <eigen3/Eigen/Dense>
 
+#include <png++/png.hpp>
+
 class OccupancyFrame
 {
 	public:
 
 		OccupancyFrame(const pangolin::Image<unsigned short> &depth,
-					   const pangolin::Image<unsigned char> &rgb);
+					   const png::image< png::rgb_pixel > &rgb);
 
 		bool compute(Eigen::Matrix4f worldPose, size_t downsampleFactor);
 
@@ -26,7 +28,7 @@ class OccupancyFrame
 
 	private:	
 		const pangolin::Image<unsigned short> depth_;
-		const pangolin::Image<unsigned char> rgbMap_;
+		const png::image< png::rgb_pixel > &rgb_;
 
 		std::vector<double> x_;
 		std::vector<double> y_;

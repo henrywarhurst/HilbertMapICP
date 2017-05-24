@@ -7,9 +7,9 @@
 #include <pcl/point_types.h>
 
 OccupancyFrame::OccupancyFrame(const pangolin::Image<unsigned short> &depth, 
-							   const pangolin::Image<unsigned char> &rgb)
+							   const png::image< png::rgb_pixel > &rgb)
 	: depth_(depth),
-	  rgbMap_(rgb)
+	  rgb_(rgb)
 	{}
 
 // 1/downsampleFactor is the percentage of pixels used
@@ -79,15 +79,16 @@ void OccupancyFrame::writePointCloud(	std::string pointCloudFileName,
 	for (size_t v=0; v<depth_.h; ++v) {
 		for (size_t u=0; u<depth_.w; ++u) {
 			size_t depthIdx = v*depth_.h + u;
-	
+
 			// Downsample
 			if (depthIdx % downsampleFactor != 0) continue;
 
 			unsigned short curDepth = depth_.RowPtr(v)[u];
 			
-			unsigned char redChannel = rgbMap_.RowPtr(v)[u*3];
-			unsigned char greenChannel = rgbMap_.RowPtr(v)[u*3 + 1];
-			unsigned char blueChannel = rgbMap_.RowPtr(v)[u*3 + 2];
+			png::rgb_pixel pixel = rgb_.get_pixel(u,v);
+			unsigned char redChannel = pixel.red;
+			unsigned char greenChannel = pixel.green;
+			unsigned char blueChannel = pixel.blue;
 		
 			// Don't bother processing dead pixels
 			if (curDepth < 5) continue;

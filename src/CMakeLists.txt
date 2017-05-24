@@ -5,6 +5,11 @@ project(ICP)
 find_package(Pangolin REQUIRED)
 find_package(CUDA REQUIRED)
 find_package(Sophus REQUIRED)
+find_package(PNG REQUIRED)
+
+FIND_PATH(png++_INCLUDE_DIR
+	NAMES  png++/color.hpp  png++/config.hpp png++/consumer.hpp png++/convert_color_space.hpp png++/end_info.hpp  png++/error.hpp  png++/ga_pixel.hpp png++/generator.hpp png++/gray_pixel.hpp png++/image.hpp png++/image_info.hpp png++/index_pixel.hpp png++/info.hpp png++/info_base.hpp  png++/io_base.hpp  png++/packed_pixel.hpp png++/palette.hpp png++/pixel_buffer.hpp  png++/pixel_traits.hpp png++/png.hpp png++/reader.hpp png++/require_color_space.hpp png++/rgb_pixel.hpp png++/rgba_pixel.hpp png++/streaming_base.hpp  png++/tRNS.hpp png++/types.hpp png++/writer.hpp)
+  
 
 #remove this as soon as eigen is shipped with FindEigen.cmake
   get_filename_component(EIGEN_ROOT "/usr/include/local/eigen3" PATH)
@@ -25,6 +30,7 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${EIGEN_INCLUDE_DIRS})
 include_directories(${Sophus_INCLUDE_DIR})
+include_directories(${PNG_INCLUDE_DIR})
 
 
 file(GLOB srcs *.cpp)
@@ -45,7 +51,7 @@ CUDA_COMPILE(cuda_objs ${cuda})
 
 find_package(PCL 1.3 REQUIRED COMPONENTS common io)
 
-include_directories(${PCL_INCLUDE_DIRS})
+include_directories(${PCL_INCLUDE_DIRS} ${png++_INCLUDE_DIR})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
@@ -64,5 +70,6 @@ target_link_libraries(ICP
                       ${CUDA_LIBRARIES}
 					  ${PCL_COMMON_LIBRARIES}
 					  ${PCL_IO_LIBRARIES}
+					  ${PNG_LIBRARY}
 )
 

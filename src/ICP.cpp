@@ -5,6 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include <pangolin/image/image_io.h>
+#include <png++/png.hpp>
 
 std::ifstream asFile;
 std::ifstream colourFile;
@@ -25,7 +26,7 @@ void tokenize(const std::string & str, std::vector<std::string> & tokens, std::s
     }
 }
 
-void loadImage(pangolin::Image<unsigned char> &rgb)
+png::image< png::rgb_pixel > loadImage()
 {   
     std::string currentLine;  
     std::vector<std::string> tokens;
@@ -40,26 +41,13 @@ void loadImage(pangolin::Image<unsigned char> &rgb)
     std::string imageLoc = directory;
     imageLoc.append(tokens[1]);
 
-    pangolin::TypedImage imageRaw = pangolin::LoadImage(imageLoc, pangolin::ImageFileTypePng);
+	png::image< png::rgb_pixel > rgb(imageLoc);
 
-	pangolin::Image<unsigned char> imageOutput((unsigned char *) imageRaw.ptr, 
-												imageRaw.w, 
-												imageRaw.h, 
-												3 * imageRaw.w * sizeof(unsigned char));
+	std::cout << "Image Width = " << rgb.get_width() << std::endl;
+	std::cout << "Image Height = " << rgb.get_height() << std::endl;
 
-	for (size_t i=0; i<imageRaw.h; ++i) {
-		for (size_t j=0; j<imageRaw.w*3; ++j) {
-			rgb.RowPtr(i)[j] = imageRaw.RowPtr(i)[j];	
-		}
-	}
-
-	std::cout << "first pixel " << (unsigned short) rgb.RowPtr(0)[0] << std::endl;
-	std::cout << "second pixel " << (unsigned short) rgb.RowPtr(0)[1] << std::endl;
-	std::cout << "third pixel " << (unsigned short) rgb.RowPtr(0)[2] << std::endl;
-
-	std::cout << "Width = " << imageRaw.w << " Height = " << imageRaw.h << std::endl;
+	return rgb;
 }
-
 
 uint64_t loadDepth(pangolin::Image<unsigned short> & depth)
 {
@@ -154,12 +142,8 @@ int main(int argc, char * argv[])
     pangolin::ManagedImage<unsigned short> firstData(640, 480);
     pangolin::ManagedImage<unsigned short> secondData(640, 480);
 
-	pangolin::ManagedImage<unsigned char> rgbData(640, 480);
-	
     pangolin::Image<unsigned short> firstRaw(firstData.w, firstData.h, firstData.pitch, (unsigned short*)firstData.ptr);
     pangolin::Image<unsigned short> secondRaw(secondData.w, secondData.h, secondData.pitch, (unsigned short*)secondData.ptr);
-
-	pangolin::Image<unsigned char> rgbRaw(rgbData.w, rgbData.h, rgbData.pitch, (unsigned char *)rgbData.ptr);
 
     ICPOdometry icpOdom(640, 480, 319.5, 239.5, 528, 528);
 
@@ -294,12 +278,12 @@ int main(int argc, char * argv[])
         timestamp = loadDepth(secondRaw);
 
 		// Get RGB data
-		loadImage(rgbRaw);
+		png::image< png::rgb_pixel > rgb = loadImage();
 
 		std::cout << "Got past the image load" << std::endl;
  		// OccupancyFrames ---------------------------------------------------------
 		size_t downsampleFactor = 1;
-		OccupancyFrame curOccupancyFrame(secondRaw, rgbRaw);
+		OccupancyFrame curOccupancyFrame(secondRaw, rgb);
 		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose, downsampleFactor);
 		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, downsampleFactor, false);
 		bool isOccupancyWriteOk = curOccupancyFrame.writeToFile(std::to_string(count) + ".occ", ",");
