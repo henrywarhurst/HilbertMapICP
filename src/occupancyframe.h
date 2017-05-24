@@ -33,6 +33,10 @@ class OccupancyFrame
 		std::vector<double> x_;
 		std::vector<double> y_;
 		std::vector<double> z_;
+
+		std::vector<int> r_;
+		std::vector<int> g_;
+		std::vector<int> b_;
 		
 		std::vector<int> occupancy_;
 

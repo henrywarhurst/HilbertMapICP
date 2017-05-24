@@ -26,6 +26,9 @@ bool OccupancyFrame::compute(Eigen::Matrix4f worldPose, size_t downsampleFactor)
 			// Downsample
 			if (depthIdx % downsampleFactor != 0) continue;
 
+			png::rgb_pixel pixel = rgb_.get_pixel(u,v);
+			bool hasCrossedSurface = false;
+			bool hasAddedSurfaceRgb = false;
 			for (size_t rayZ=kStartZ; rayZ<kMaxZ; rayZ+=kStepZ) {
 				double curZ = (double) rayZ / kCorrectionFactor;	
 				double curX = (u - kOpticalCentreX)*curZ / kFocalLengthX;
@@ -34,6 +37,19 @@ bool OccupancyFrame::compute(Eigen::Matrix4f worldPose, size_t downsampleFactor)
 				int curOccupancy = -1;
 				if (rayZ > (size_t) curDepth) {
 					curOccupancy = 1;
+					hasCrossedSurface = true;
+				}
+
+				if (hasCrossedSurface && !hasAddedSurfaceRgb) {
+					hasAddedSurfaceRgb = true;
+	       		    r_.push_back(pixel.red);
+					g_.push_back(pixel.green);
+					b_.push_back(pixel.blue);
+				} else {
+					// Push impossible values when we aren't at a surface
+					r_.push_back(-1);
+					g_.push_back(-1);
+					b_.push_back(-1);
 				}
 				
 				// Transform points to accurate world locations
@@ -160,7 +176,10 @@ bool OccupancyFrame::writeToFile(std::string filename, std::string delim)
 		occupancyFile << x_[i] 			<< delim;
 		occupancyFile << y_[i] 			<< delim;
 		occupancyFile << z_[i] 			<< delim;
-		occupancyFile << occupancy_[i] 	<< std::endl;	
+		occupancyFile << occupancy_[i] 	<< delim;
+		occupancyFile << r_[i]			<< delim;
+		occupancyFile << g_[i]			<< delim;
+		occupancyFile << b_[i]			<< std::endl;	
 	}
 	occupancyFile.close();
 
