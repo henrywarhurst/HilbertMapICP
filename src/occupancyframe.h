@@ -47,7 +47,7 @@ class OccupancyFrame
 		static constexpr const double kOpticalCentreY 	= 239.5		;
 
 		static constexpr const size_t kMaxZ				= 2000		;
-		static constexpr const size_t kStepZ			= 50		;
+		static constexpr const size_t kStepZ			= 200		;
 		static constexpr const size_t kStartZ			= 100		;
 };
 

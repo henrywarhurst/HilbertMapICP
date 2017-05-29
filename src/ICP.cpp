@@ -282,7 +282,7 @@ int main(int argc, char * argv[])
 
 		std::cout << "Got past the image load" << std::endl;
  		// OccupancyFrames ---------------------------------------------------------
-		size_t downsampleFactor = 1;
+		size_t downsampleFactor = 4;
 		OccupancyFrame curOccupancyFrame(secondRaw, rgb);
 		bool isOccupancyComputationOk = curOccupancyFrame.compute(worldPose, downsampleFactor);
 		curOccupancyFrame.writePointCloud(std::to_string(count) + ".pcd", worldPose, downsampleFactor, false);

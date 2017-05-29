@@ -172,6 +172,8 @@ bool OccupancyFrame::writeToFile(std::string filename, std::string delim)
 		return false;
 	}
 
+	std::cout << "x_.size() = " << x_.size() << std::endl;
+
 	for (size_t i=0; i<x_.size(); ++i) {
 		occupancyFile << x_[i] 			<< delim;
 		occupancyFile << y_[i] 			<< delim;
